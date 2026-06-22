@@ -1,4 +1,5 @@
 import os
+import time
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.output_parsers import StrOutputParser
@@ -42,6 +43,9 @@ def _llm() -> ChatOpenAI:
 
 
 def ask(question: str, session_id: str = "default") -> dict:
+    from src.analytics.logger import log_query
+
+    t0 = time.monotonic()
     retriever = get_store().as_retriever(search_kwargs={"k": 5})
     docs = retriever.invoke(question)
 
@@ -59,6 +63,9 @@ def ask(question: str, session_id: str = "default") -> dict:
     )
 
     sources = sorted({doc.metadata.get("source", "unknown") for doc in docs})
+    latency_ms = (time.monotonic() - t0) * 1000
+    log_query(session_id, question, answer, sources, latency_ms)
+
     return {"answer": answer, "sources": sources, "session_id": session_id}
 
 

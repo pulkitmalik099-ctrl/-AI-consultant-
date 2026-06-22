@@ -9,5 +9,10 @@ venv/
 .idea/
 .vscode/
 *.log
+logs/*.jsonl
 data/documents/*
 !data/documents/.gitkeep
+data/zendesk/*
+!data/zendesk/.gitkeep
+data/jira/*
+!data/jira/.gitkeep
