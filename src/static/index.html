@@ -422,6 +422,69 @@
       from { transform: translateY(8px); opacity: 0; }
       to   { transform: translateY(0);   opacity: 1; }
     }
+
+    /* ── Ticket Sources Panel ── */
+    .sidebar-footer { max-height: 500px; overflow-y: auto; }
+    .sidebar-footer::-webkit-scrollbar { width: 3px; }
+    .sidebar-footer::-webkit-scrollbar-thumb { background: #2d3142; border-radius: 2px; }
+    .ticket-panel { background: #1e2130; border: 1px solid #2d3347; border-radius: 8px; overflow: hidden; }
+    .ticket-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 9px 11px; cursor: pointer; user-select: none; }
+    .ticket-panel-header:hover { background: #252840; }
+    .ticket-panel-title { font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: .7px; }
+    .ticket-panel-arrow { font-size: 10px; color: #475569; transition: transform .2s; }
+    .ticket-panel.open .ticket-panel-arrow { transform: rotate(180deg); }
+    .ticket-panel-body { display: none; padding: 0 11px 11px; gap: 10px; flex-direction: column; }
+    .ticket-panel.open .ticket-panel-body { display: flex; }
+    .provider-block { background: #252840; border-radius: 7px; overflow: hidden; }
+    .provider-header { display: flex; align-items: center; gap: 8px; padding: 8px 10px; }
+    .provider-checkbox { width: 15px; height: 15px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+    .provider-label { font-size: 12px; font-weight: 600; color: #e2e8f0; cursor: pointer; display: flex; align-items: center; gap: 6px; flex: 1; }
+    .provider-badge { font-size: 9px; padding: 2px 6px; border-radius: 10px; font-weight: 700; letter-spacing: .3px; }
+    .badge-zd { background: #1d4a2a; color: #86efac; }
+    .badge-jira { background: #1a3a5c; color: #93c5fd; }
+    .provider-config { display: none; padding: 0 10px 10px; gap: 8px; flex-direction: column; }
+    .provider-block.enabled .provider-config { display: flex; }
+    .mode-row { display: flex; gap: 6px; }
+    .mode-option { flex: 1; display: flex; align-items: center; gap: 5px; padding: 5px 8px; border-radius: 5px; border: 1px solid #334155; cursor: pointer; transition: border-color .15s; }
+    .mode-option input[type=radio] { accent-color: var(--accent); cursor: pointer; }
+    .mode-option:has(input:checked) { border-color: var(--accent); background: #1a2540; }
+    .mode-option span { font-size: 11px; color: #94a3b8; font-weight: 500; }
+    .mode-option:has(input:checked) span { color: #93c5fd; }
+    .online-fields { display: none; flex-direction: column; gap: 5px; margin-top: 2px; }
+    .online-fields.visible { display: flex; }
+    .pfield { display: flex; flex-direction: column; gap: 2px; }
+    .pfield label { font-size: 10px; color: #64748b; font-weight: 500; text-transform: uppercase; letter-spacing: .5px; }
+    .pfield input { background: #16181d; border: 1px solid #334155; border-radius: 5px; padding: 5px 8px; font-size: 11px; color: #e2e8f0; outline: none; font-family: inherit; width: 100%; }
+    .pfield input:focus { border-color: var(--accent); }
+    .pfield input::placeholder { color: #334155; }
+    .field-hint { font-size: 10px; color: #475569; line-height: 1.5; }
+    .btn-testcase { padding: 9px 14px; background: #312e81; color: #c7d2fe; border: none; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; width: 100%; letter-spacing: .2px; }
+    .btn-testcase:hover { background: #3730a3; }
+
+    /* ── Test Case Modal ── */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: #1e2130; border: 1px solid #2d3347; border-radius: 12px; width: 460px; max-width: calc(100vw - 32px); padding: 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+    .modal h2 { font-size: 15px; font-weight: 700; color: #f1f5f9; }
+    .modal-sub { font-size: 12px; color: #64748b; margin-top: -8px; }
+    .modal-body { display: flex; flex-direction: column; gap: 12px; }
+    .mfield { display: flex; flex-direction: column; gap: 4px; }
+    .mfield label { font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+    .mfield input, .mfield select, .mfield textarea { background: #16181d; border: 1px solid #334155; border-radius: 6px; padding: 7px 10px; font-size: 13px; color: #e2e8f0; outline: none; font-family: inherit; width: 100%; }
+    .mfield input:focus, .mfield select:focus, .mfield textarea:focus { border-color: var(--accent); }
+    .mfield select option { background: #16181d; }
+    .mfield textarea { resize: vertical; min-height: 60px; }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .btn-mcancel { padding: 8px 16px; background: transparent; color: #64748b; border: 1px solid #334155; border-radius: 7px; font-size: 13px; cursor: pointer; }
+    .btn-mcancel:hover { border-color: #475569; color: #94a3b8; }
+    .btn-mok { padding: 8px 16px; background: var(--accent); color: #fff; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .btn-mok:hover { background: var(--accent-hover); }
+    .type-row { display: flex; gap: 8px; }
+    .type-opt { flex: 1; display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 6px; border: 1px solid #334155; cursor: pointer; transition: border-color .15s; }
+    .type-opt input[type=radio] { accent-color: var(--accent); cursor: pointer; }
+    .type-opt:has(input:checked) { border-color: var(--accent); background: #1a2540; }
+    .type-opt span { font-size: 12px; color: #94a3b8; font-weight: 500; }
+    .type-opt:has(input:checked) span { color: #93c5fd; }
   </style>
 </head>
 <body>
@@ -439,13 +502,105 @@
   <div class="sessions-list" id="sessions-list"></div>
 
   <div class="sidebar-footer">
+
     <label class="upload-zone">
       <input type="file" id="file-input" accept=".pdf,.docx,.txt" onchange="uploadFile(this)" />
-      📎 Upload Document (PDF / DOCX / TXT)
+      &#128206; Upload Document (PDF / DOCX / TXT)
     </label>
+
+    <!-- Ticket Sources collapsible panel -->
+    <div class="ticket-panel" id="ticket-panel">
+      <div class="ticket-panel-header" onclick="toggleTicketPanel()">
+        <span class="ticket-panel-title">&#127915; Ticket Sources</span>
+        <span class="ticket-panel-arrow">&#9660;</span>
+      </div>
+      <div class="ticket-panel-body">
+
+        <!-- Zendesk -->
+        <div class="provider-block" id="zd-block">
+          <div class="provider-header">
+            <input type="checkbox" class="provider-checkbox" id="zd-enabled" onchange="toggleProvider('zd')" />
+            <label class="provider-label" for="zd-enabled">
+              Zendesk <span class="provider-badge badge-zd">ZD</span>
+            </label>
+          </div>
+          <div class="provider-config">
+            <div class="mode-row">
+              <label class="mode-option">
+                <input type="radio" name="zd-mode" value="offline" checked onchange="toggleOnlineFields('zd')" />
+                <span>Offline CSV</span>
+              </label>
+              <label class="mode-option">
+                <input type="radio" name="zd-mode" value="online" onchange="toggleOnlineFields('zd')" />
+                <span>Online API</span>
+              </label>
+            </div>
+            <div class="online-fields" id="zd-online-fields">
+              <div class="pfield"><label for="zd-subdomain">Subdomain</label>
+                <input id="zd-subdomain" type="text" placeholder="yourcompany (no .zendesk.com)" /></div>
+              <div class="pfield"><label for="zd-email">Email</label>
+                <input id="zd-email" type="email" placeholder="admin@yourcompany.com" /></div>
+              <div class="pfield"><label for="zd-token">API Token</label>
+                <input id="zd-token" type="password" placeholder="your-zendesk-token" /></div>
+              <div class="pfield"><label for="zd-limit">Ticket Limit</label>
+                <input id="zd-limit" type="number" value="500" min="1" max="5000" /></div>
+            </div>
+            <p class="field-hint" id="zd-offline-hint">
+              Drop CSV exports into <code style="color:#60a5fa">data/zendesk/</code>
+              &mdash; required cols: id, subject, description
+            </p>
+          </div>
+        </div>
+
+        <!-- Jira -->
+        <div class="provider-block" id="jira-block">
+          <div class="provider-header">
+            <input type="checkbox" class="provider-checkbox" id="jira-enabled" onchange="toggleProvider('jira')" />
+            <label class="provider-label" for="jira-enabled">
+              Jira <span class="provider-badge badge-jira">JIRA</span>
+            </label>
+          </div>
+          <div class="provider-config">
+            <div class="mode-row">
+              <label class="mode-option">
+                <input type="radio" name="jira-mode" value="offline" checked onchange="toggleOnlineFields('jira')" />
+                <span>Offline CSV</span>
+              </label>
+              <label class="mode-option">
+                <input type="radio" name="jira-mode" value="online" onchange="toggleOnlineFields('jira')" />
+                <span>Online API</span>
+              </label>
+            </div>
+            <div class="online-fields" id="jira-online-fields">
+              <div class="pfield"><label for="jira-url">Server URL</label>
+                <input id="jira-url" type="url" placeholder="https://yourcompany.atlassian.net" /></div>
+              <div class="pfield"><label for="jira-user">Username / Email</label>
+                <input id="jira-user" type="email" placeholder="admin@yourcompany.com" /></div>
+              <div class="pfield"><label for="jira-token">API Token</label>
+                <input id="jira-token" type="password" placeholder="your-jira-token" /></div>
+              <div class="pfield"><label for="jira-project">Project Key (optional)</label>
+                <input id="jira-project" type="text" placeholder="BEN" /></div>
+              <div class="pfield"><label for="jira-limit">Issue Limit</label>
+                <input id="jira-limit" type="number" value="500" min="1" max="5000" /></div>
+            </div>
+            <p class="field-hint" id="jira-offline-hint">
+              Drop CSV exports into <code style="color:#60a5fa">data/jira/</code>
+              &mdash; required cols: Issue key, Summary, Description
+            </p>
+          </div>
+        </div>
+
+      </div><!-- /ticket-panel-body -->
+    </div><!-- /ticket-panel -->
+
     <button class="btn-ingest" id="btn-ingest" onclick="ingest()">
-      ⚡ Index All Documents
+      &#9889; Index All Documents
     </button>
+
+    <button class="btn-testcase" onclick="openTestCaseModal()">
+      &#129514; Generate Test Cases
+    </button>
+
   </div>
 </aside>
 
@@ -461,9 +616,12 @@
       <div class="welcome-icon">🤖</div>
       <h2>Benefits Administration Copilot</h2>
       <p>
-        Ask questions about BRDs, benefit specs, reporting specs, and tickets.
-        Upload documents or click <strong>Index All Documents</strong> after
-        adding files to <code>data/documents/</code>.
+        Ask questions about BRDs, benefit specs, and support tickets.
+        Expand <strong>Ticket Sources</strong> in the sidebar to connect
+        <strong>Zendesk</strong> or <strong>Jira</strong> (offline CSV or live API),
+        then click <strong>Index All Documents</strong>.<br><br>
+        Use <strong>Generate Test Cases</strong> to create configurator unit tests
+        or QA test cases for any site and benefit.
       </p>
       <div class="chips">
         <span class="chip" onclick="ask('What are the dental plan eligibility rules?')">Dental eligibility</span>
@@ -484,12 +642,143 @@
   </div>
 </div>
 
+<!-- Test Case Modal -->
+<div class="modal-overlay" id="testcase-modal">
+  <div class="modal">
+    <h2>&#129514; Generate Test Cases</h2>
+    <p class="modal-sub">Specify the scope and test type before generating.</p>
+    <div class="modal-body">
+      <div class="mfield">
+        <label for="tc-site">Site / Client</label>
+        <input id="tc-site" type="text" placeholder="e.g. Acme Corp UK, US HQ, APAC..." />
+      </div>
+      <div class="mfield">
+        <label for="tc-benefit">Benefit</label>
+        <input id="tc-benefit" type="text" placeholder="e.g. Medical PPO, Dental, Vision, HDHP, Life..." />
+      </div>
+      <div class="mfield">
+        <label>Test Type</label>
+        <div class="type-row">
+          <label class="type-opt">
+            <input type="radio" name="tc-type" value="configurator" checked />
+            <span>&#9881;&#65039; Configurator Unit Test</span>
+          </label>
+          <label class="type-opt">
+            <input type="radio" name="tc-type" value="qa" />
+            <span>&#9989; QA Testing</span>
+          </label>
+        </div>
+      </div>
+      <div class="mfield">
+        <label for="tc-notes">Additional Notes (optional)</label>
+        <textarea id="tc-notes" placeholder="Specific scenarios, edge cases, or requirements..."></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-mcancel" onclick="closeTestCaseModal()">Cancel</button>
+      <button class="btn-mok" onclick="generateTestCases()">Generate</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── State ──────────────────────────────────────────────────────────────────
 let currentSession = 'session-' + Date.now();
 let sessions       = [currentSession];
 let streaming      = false;
 const apiKey       = () => localStorage.getItem('api_key') || '';
+
+// ── Ticket Panel ───────────────────────────────────────────────────────────
+function toggleTicketPanel() {
+  document.getElementById('ticket-panel').classList.toggle('open');
+}
+
+function toggleProvider(p) {
+  document.getElementById(p + '-block').classList.toggle('enabled',
+    document.getElementById(p + '-enabled').checked);
+}
+
+function toggleOnlineFields(p) {
+  const isOnline = document.querySelector('input[name="' + p + '-mode"]:checked').value === 'online';
+  document.getElementById(p + '-online-fields').classList.toggle('visible', isOnline);
+  const hint = document.getElementById(p + '-offline-hint');
+  if (hint) hint.style.display = isOnline ? 'none' : '';
+}
+
+function buildTicketSources() {
+  const sources = [];
+
+  if (document.getElementById('zd-enabled').checked) {
+    const mode = document.querySelector('input[name="zd-mode"]:checked').value;
+    const src  = { provider: 'zendesk', mode };
+    if (mode === 'online') {
+      const sub = document.getElementById('zd-subdomain').value.trim();
+      const em  = document.getElementById('zd-email').value.trim();
+      const tok = document.getElementById('zd-token').value.trim();
+      if (!sub || !em || !tok) { toast('Zendesk: fill in subdomain, email and token', 'error'); return null; }
+      src.zendesk_config = { subdomain: sub, email: em, api_token: tok,
+        limit: parseInt(document.getElementById('zd-limit').value, 10) || 500 };
+    }
+    sources.push(src);
+  }
+
+  if (document.getElementById('jira-enabled').checked) {
+    const mode = document.querySelector('input[name="jira-mode"]:checked').value;
+    const src  = { provider: 'jira', mode };
+    if (mode === 'online') {
+      const url  = document.getElementById('jira-url').value.trim();
+      const usr  = document.getElementById('jira-user').value.trim();
+      const tok  = document.getElementById('jira-token').value.trim();
+      const proj = document.getElementById('jira-project').value.trim() || null;
+      if (!url || !usr || !tok) { toast('Jira: fill in server URL, username and token', 'error'); return null; }
+      src.jira_config = { server_url: url, username: usr, api_token: tok, project_key: proj,
+        limit: parseInt(document.getElementById('jira-limit').value, 10) || 500 };
+    }
+    sources.push(src);
+  }
+
+  return sources.length ? sources : null;
+}
+
+// ── Test Case Modal ────────────────────────────────────────────────────────
+function openTestCaseModal() {
+  document.getElementById('testcase-modal').classList.add('open');
+}
+
+function closeTestCaseModal() {
+  document.getElementById('testcase-modal').classList.remove('open');
+}
+
+// Close on overlay click (runs after DOM loads)
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('testcase-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeTestCaseModal();
+  });
+});
+
+function generateTestCases() {
+  const site    = document.getElementById('tc-site').value.trim();
+  const benefit = document.getElementById('tc-benefit').value.trim();
+  const type    = document.querySelector('input[name="tc-type"]:checked').value;
+  const notes   = document.getElementById('tc-notes').value.trim();
+
+  if (!site || !benefit) { toast('Please enter a site and a benefit', 'error'); return; }
+
+  closeTestCaseModal();
+
+  const typeLabel  = type === 'configurator' ? 'Configurator Unit Test' : 'QA Test';
+  const notesLine  = notes ? '\n\nAdditional context: ' + notes : '';
+  const prompt =
+    'Generate ' + typeLabel + ' cases for the following:\n' +
+    'Site: ' + site + '\n' +
+    'Benefit: ' + benefit + notesLine + '\n\n' +
+    'Use the indexed BRD documents, benefit specifications, and ticket history ' +
+    'to produce comprehensive, accurate test cases. ' +
+    'For each test case include: Test Case ID, Description, Preconditions, ' +
+    'Test Steps, Expected Results, and Priority (High/Medium/Low).';
+
+  ask(prompt);
+}
 
 // ── Boot ───────────────────────────────────────────────────────────────────
 window.onload = async () => {
@@ -678,22 +967,36 @@ async function uploadFile(input) {
 
 // ── Ingest ─────────────────────────────────────────────────────────────────
 async function ingest() {
+  const zdEnabled   = document.getElementById('zd-enabled').checked;
+  const jiraEnabled = document.getElementById('jira-enabled').checked;
+  const ticketSources = buildTicketSources();
+  if (ticketSources === null && (zdEnabled || jiraEnabled)) return; // validation failed
+
+  const body = {};
+  if (ticketSources && ticketSources.length) body.ticket_sources = ticketSources;
+
   const btn = document.getElementById('btn-ingest');
   btn.disabled = true;
-  btn.textContent = 'Indexing…';
-  setStatus('Indexing all documents…');
+  const pv = [];
+  if (zdEnabled)   pv.push('Zendesk');
+  if (jiraEnabled) pv.push('Jira');
+  const lbl = pv.length ? 'Indexing docs + ' + pv.join(' + ') + '...' : 'Indexing all documents...';
+  btn.textContent = lbl;
+  setStatus(lbl);
+
   try {
     const res  = await apiFetch('/ingest', {
       method: 'POST',
-      body: '{}',
+      body: JSON.stringify(body),
       headers: { 'Content-Type': 'application/json' },
     });
     const data = await res.json();
-    if (res.ok) toast(`Indexed ${data.documents_loaded} docs · ${data.chunks_created} chunks`, 'success');
+    if (res.ok) toast('Indexed ' + data.documents_loaded + ' docs - ' + data.chunks_created + ' chunks', 'success');
     else toast(data.detail || 'Ingest failed', 'error');
   } catch { toast('Ingest failed', 'error'); }
+
   btn.disabled = false;
-  btn.textContent = '⚡ Index All Documents';
+  btn.textContent = '&#9889; Index All Documents';
   setStatus('');
 }
 
