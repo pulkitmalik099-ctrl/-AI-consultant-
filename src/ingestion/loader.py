@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader, TextLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from src.ingestion.models import TicketProvider, TicketMode, TicketSource, ZendeskOnlineConfig, JiraOnlineConfig
 from src.ingestion.tickets import load_all_zendesk, load_all_jira
 

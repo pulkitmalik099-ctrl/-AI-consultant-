@@ -8,7 +8,7 @@ Place exports in:
 
 import csv
 from pathlib import Path
-from langchain.schema import Document
+from langchain_core.documents import Document
 from src.ingestion.models import TicketProvider
 
 DATA_DIR = Path(__file__).parents[2] / "data"

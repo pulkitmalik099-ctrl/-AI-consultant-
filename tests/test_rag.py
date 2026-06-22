@@ -1,5 +1,5 @@
 import pytest
-from langchain.schema import Document
+from langchain_core.documents import Document
 from src.ingestion.loader import chunk_documents
 from src.ingestion.models import TicketProvider, TicketMode, JiraOnlineConfig, TicketSource
 from src.retrieval import vector_store as vs

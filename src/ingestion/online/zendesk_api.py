@@ -1,7 +1,7 @@
 """Online Zendesk ticket fetcher via Zendesk REST API."""
 
 import requests
-from langchain.schema import Document
+from langchain_core.documents import Document
 from src.ingestion.models import ZendeskOnlineConfig
 
 
