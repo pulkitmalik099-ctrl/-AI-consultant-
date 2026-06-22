@@ -1,13 +1,13 @@
-import io
 import pytest
 from langchain.schema import Document
 from src.ingestion.loader import chunk_documents
+from src.ingestion.models import TicketProvider, TicketMode, JiraOnlineConfig, TicketSource
 from src.retrieval import vector_store as vs
 from src.rag.memory import get_session_history, clear_session
 
 
 # ---------------------------------------------------------------------------
-# Ingestion
+# Ingestion — chunking
 # ---------------------------------------------------------------------------
 
 def test_chunk_splits_large_text():
@@ -38,7 +38,32 @@ def test_get_indexed_docs_empty_before_ingest():
 
 
 # ---------------------------------------------------------------------------
-# Zendesk / Jira ticket loading
+# Models
+# ---------------------------------------------------------------------------
+
+def test_ticket_mode_values():
+    assert TicketMode.ONLINE == "online"
+    assert TicketMode.OFFLINE == "offline"
+
+
+def test_jira_config_strips_trailing_slash():
+    config = JiraOnlineConfig(
+        server_url="https://company.atlassian.net/",
+        username="admin",
+        api_token="token",
+    )
+    assert not config.server_url.endswith("/")
+
+
+def test_ticket_source_offline_zendesk():
+    source = TicketSource(provider=TicketProvider.ZENDESK, mode=TicketMode.OFFLINE)
+    assert source.provider == TicketProvider.ZENDESK
+    assert source.mode == TicketMode.OFFLINE
+    assert source.zendesk_config is None
+
+
+# ---------------------------------------------------------------------------
+# Offline CSV loaders
 # ---------------------------------------------------------------------------
 
 def test_load_zendesk_csv(tmp_path):
@@ -54,6 +79,7 @@ def test_load_zendesk_csv(tmp_path):
     assert "Ticket #101" in docs[0].page_content
     assert docs[0].metadata["ticket_id"] == "101"
     assert docs[0].metadata["source"] == "zendesk://ticket/101"
+    assert docs[0].metadata["mode"] == "offline"
 
 
 def test_load_zendesk_csv_missing_columns(tmp_path):
@@ -76,6 +102,7 @@ def test_load_jira_csv(tmp_path):
     assert len(docs) == 1
     assert "BEN-42" in docs[0].page_content
     assert docs[0].metadata["source"] == "jira://issue/BEN-42"
+    assert docs[0].metadata["mode"] == "offline"
 
 
 def test_load_jira_csv_missing_columns(tmp_path):
@@ -84,6 +111,18 @@ def test_load_jira_csv_missing_columns(tmp_path):
     csv_file.write_text("Issue key,Summary\nBEN-1,test\n", encoding="utf-8")
     with pytest.raises(ValueError, match="missing Jira columns"):
         load_jira_csv(csv_file)
+
+
+def test_load_all_zendesk_skips_missing_dir(tmp_path):
+    from src.ingestion.tickets import load_all_zendesk
+    docs = load_all_zendesk(directory=tmp_path / "nonexistent")
+    assert docs == []
+
+
+def test_load_all_jira_skips_missing_dir(tmp_path):
+    from src.ingestion.tickets import load_all_jira
+    docs = load_all_jira(directory=tmp_path / "nonexistent")
+    assert docs == []
 
 
 # ---------------------------------------------------------------------------
@@ -99,7 +138,8 @@ def test_session_history_is_isolated():
 
 
 def test_clear_session_removes_history():
-    hist = get_session_history("temp-session")
+    get_session_history("temp-session")
     clear_session("temp-session")
     new_hist = get_session_history("temp-session")
-    assert new_hist is not hist
+    # After clearing, a fresh history object is created
+    assert len(new_hist.messages) == 0

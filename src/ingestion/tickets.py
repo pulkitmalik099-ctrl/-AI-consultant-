@@ -1,37 +1,22 @@
 """
-Ticketing system ingestion — supports Zendesk and Jira CSV exports.
+Offline ticket ingestion — loads Zendesk and Jira CSV exports.
 
-Usage:
-  - Zendesk exports: place CSV files in  data/zendesk/
-  - Jira exports:    place CSV files in  data/jira/
-
-Both directories are loaded automatically on /ingest.
-Mixed environments (Zendesk + Jira) are fully supported.
-
-Zendesk CSV required columns:  id, subject, description
-Jira CSV required columns:      Issue key, Summary, Description
+Place exports in:
+  data/zendesk/   ← Zendesk CSV (columns: id, subject, description, status)
+  data/jira/      ← Jira CSV    (columns: Issue key, Summary, Description, Status, Issue Type)
 """
 
 import csv
-from enum import Enum
 from pathlib import Path
 from langchain.schema import Document
+from src.ingestion.models import TicketProvider
 
 DATA_DIR = Path(__file__).parents[2] / "data"
 ZENDESK_DIR = DATA_DIR / "zendesk"
 JIRA_DIR = DATA_DIR / "jira"
 
-
-class TicketProvider(str, Enum):
-    ZENDESK = "zendesk"
-    JIRA = "jira"
-
-
-# ---------------------------------------------------------------------------
-# Zendesk
-# ---------------------------------------------------------------------------
-
 _ZENDESK_REQUIRED = {"id", "subject", "description"}
+_JIRA_REQUIRED = {"Issue key", "Summary", "Description"}
 
 
 def load_zendesk_csv(path: Path) -> list[Document]:
@@ -53,6 +38,7 @@ def load_zendesk_csv(path: Path) -> list[Document]:
                     metadata={
                         "source": f"zendesk://ticket/{ticket_id}",
                         "provider": TicketProvider.ZENDESK,
+                        "mode": "offline",
                         "ticket_id": ticket_id,
                         "subject": subject,
                         "status": status,
@@ -60,13 +46,6 @@ def load_zendesk_csv(path: Path) -> list[Document]:
                 )
             )
     return docs
-
-
-# ---------------------------------------------------------------------------
-# Jira
-# ---------------------------------------------------------------------------
-
-_JIRA_REQUIRED = {"Issue key", "Summary", "Description"}
 
 
 def load_jira_csv(path: Path) -> list[Document]:
@@ -92,6 +71,7 @@ def load_jira_csv(path: Path) -> list[Document]:
                     metadata={
                         "source": f"jira://issue/{issue_key}",
                         "provider": TicketProvider.JIRA,
+                        "mode": "offline",
                         "issue_key": issue_key,
                         "summary": summary,
                         "status": status,
@@ -101,10 +81,6 @@ def load_jira_csv(path: Path) -> list[Document]:
             )
     return docs
 
-
-# ---------------------------------------------------------------------------
-# Bulk loaders
-# ---------------------------------------------------------------------------
 
 def load_all_zendesk(directory: Path = ZENDESK_DIR) -> list[Document]:
     docs = []
@@ -119,23 +95,4 @@ def load_all_jira(directory: Path = JIRA_DIR) -> list[Document]:
     if directory.exists():
         for path in directory.glob("*.csv"):
             docs.extend(load_jira_csv(path))
-    return docs
-
-
-def load_all_tickets(
-    providers: list[TicketProvider] | None = None,
-) -> list[Document]:
-    """Load tickets from all enabled providers.
-
-    Args:
-        providers: list of TicketProvider values to include.
-                   Defaults to all providers (Zendesk + Jira).
-    """
-    if providers is None:
-        providers = list(TicketProvider)
-    docs = []
-    if TicketProvider.ZENDESK in providers:
-        docs.extend(load_all_zendesk())
-    if TicketProvider.JIRA in providers:
-        docs.extend(load_all_jira())
     return docs
