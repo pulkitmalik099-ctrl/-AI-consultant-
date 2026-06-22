@@ -3,6 +3,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 
 _store: FAISS | None = None
+_indexed_docs: list[str] = []
 
 
 def _embeddings() -> OpenAIEmbeddings:
@@ -10,8 +11,9 @@ def _embeddings() -> OpenAIEmbeddings:
 
 
 def build_store(chunks: list) -> FAISS:
-    global _store
+    global _store, _indexed_docs
     _store = FAISS.from_documents(chunks, _embeddings())
+    _indexed_docs = sorted({chunk.metadata.get("source", "unknown") for chunk in chunks})
     return _store
 
 
@@ -19,6 +21,10 @@ def get_store() -> FAISS:
     if _store is None:
         raise RuntimeError("Vector store not initialized. POST /ingest first.")
     return _store
+
+
+def get_indexed_docs() -> list[str]:
+    return _indexed_docs
 
 
 def search(query: str, k: int = 5) -> list:
