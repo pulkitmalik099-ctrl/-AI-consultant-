@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Consultant Knowledge Copilot</title>
+  <style>
+    :root {
+      --sidebar: #16181d;
+      --sidebar-hover: #252830;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --bg: #f1f5f9;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --muted: #64748b;
+      --user-bubble: #3b82f6;
+      --ai-bubble: #ffffff;
+      --chip: #f1f5f9;
+      --chip-text: #475569;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #d97706;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+      font-size: 14px;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 256px;
+      min-width: 256px;
+      background: var(--sidebar);
+      display: flex;
+      flex-direction: column;
+      color: #cbd5e1;
+    }
+
+    .sidebar-brand {
+      padding: 18px 16px 14px;
+      border-bottom: 1px solid #252830;
+    }
+
+    .sidebar-brand h1 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #f8fafc;
+      letter-spacing: 0.2px;
+    }
+
+    .sidebar-brand p {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    .btn-new {
+      margin: 12px 12px 4px;
+      padding: 8px 14px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      width: calc(100% - 24px);
+      text-align: left;
+    }
+
+    .btn-new:hover { background: var(--accent-hover); }
+
+    .section-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 14px 16px 4px;
+    }
+
+    .sessions-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2px 8px 0;
+    }
+
+    .sessions-list::-webkit-scrollbar { width: 3px; }
+    .sessions-list::-webkit-scrollbar-thumb { background: #2d3142; border-radius: 2px; }
+
+    .session-row {
+      display: flex;
+      align-items: center;
+      padding: 7px 8px;
+      border-radius: 7px;
+      cursor: pointer;
+      gap: 6px;
+    }
+
+    .session-row:hover { background: var(--sidebar-hover); }
+    .session-row.active { background: var(--accent); color: #fff; }
+
+    .session-name {
+      flex: 1;
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .btn-x {
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      font-size: 13px;
+      opacity: 0.5;
+      padding: 0 2px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .btn-x:hover { opacity: 1; }
+
+    .sidebar-footer {
+      padding: 10px 12px 14px;
+      border-top: 1px solid #252830;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .upload-zone {
+      border: 1.5px dashed #334155;
+      border-radius: 8px;
+      padding: 11px 10px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 11px;
+      color: #64748b;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .upload-zone:hover { border-color: var(--accent); color: var(--accent); }
+    .upload-zone input { display: none; }
+
+    .btn-ingest {
+      padding: 9px 14px;
+      background: #166534;
+      color: #bbf7d0;
+      border: none;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      letter-spacing: 0.2px;
+    }
+
+    .btn-ingest:hover { background: #15803d; }
+    .btn-ingest:disabled { background: #1e293b; color: #475569; cursor: not-allowed; }
+
+    /* ── Main ── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .topbar-title {
+      font-size: 14px;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .topbar-status {
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    /* ── Messages ── */
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .messages::-webkit-scrollbar { width: 5px; }
+    .messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+    .welcome {
+      align-self: center;
+      text-align: center;
+      max-width: 460px;
+      padding-top: 60px;
+    }
+
+    .welcome-icon {
+      font-size: 44px;
+      margin-bottom: 14px;
+    }
+
+    .welcome h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .welcome p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .welcome .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .welcome .chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .welcome .chip:hover { border-color: var(--accent); color: var(--accent); }
+
+    .message {
+      display: flex;
+      flex-direction: column;
+      max-width: 75%;
+    }
+
+    .message.user { align-self: flex-end; align-items: flex-end; }
+    .message.ai   { align-self: flex-start; align-items: flex-start; }
+
+    .msg-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--muted);
+      margin-bottom: 4px;
+      padding: 0 4px;
+    }
+
+    .bubble {
+      padding: 11px 15px;
+      border-radius: 12px;
+      line-height: 1.65;
+      word-break: break-word;
+    }
+
+    .message.user .bubble {
+      background: var(--user-bubble);
+      color: #fff;
+      border-radius: 12px 12px 2px 12px;
+    }
+
+    .message.ai .bubble {
+      background: var(--ai-bubble);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 2px 12px 12px 12px;
+    }
+
+    .bubble p { margin-bottom: 7px; }
+    .bubble p:last-child { margin-bottom: 0; }
+    .bubble ul, .bubble ol { margin: 6px 0 6px 18px; }
+    .bubble li { margin-bottom: 4px; }
+    .bubble strong { font-weight: 600; }
+    .bubble em { font-style: italic; }
+    .bubble code {
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: 'SF Mono', Consolas, monospace;
+    }
+    .message.user .bubble code { background: rgba(255,255,255,0.2); color: #fff; }
+
+    .bubble h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+
+    .sources {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 8px;
+      padding: 0 4px;
+    }
+
+    .src-chip {
+      background: var(--chip);
+      color: var(--chip-text);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    /* Typing dots */
+    .typing {
+      display: inline-flex;
+      gap: 4px;
+      padding: 4px 2px;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      background: #94a3b8;
+      border-radius: 50%;
+      animation: pulse 1.3s ease-in-out infinite;
+    }
+
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes pulse {
+      0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+      40%            { transform: scale(1);   opacity: 1; }
+    }
+
+    /* ── Input ── */
+    .input-bar {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+    }
+
+    textarea#input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      font-size: 14px;
+      font-family: inherit;
+      line-height: 1.55;
+      resize: none;
+      max-height: 160px;
+      outline: none;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    textarea#input:focus { border-color: var(--accent); background: #fff; }
+
+    .btn-send {
+      padding: 10px 18px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-send:hover:not(:disabled) { background: var(--accent-hover); }
+    .btn-send:disabled { background: #94a3b8; cursor: not-allowed; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 22px;
+      right: 22px;
+      padding: 11px 18px;
+      border-radius: 9px;
+      font-size: 13px;
+      color: #fff;
+      z-index: 9999;
+      max-width: 320px;
+      animation: toastIn 0.2s ease;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+
+    .toast.success { background: var(--success); }
+    .toast.error   { background: var(--danger); }
+    .toast.info    { background: #0ea5e9; }
+
+    @keyframes toastIn {
+      from { transform: translateY(8px); opacity: 0; }
+      to   { transform: translateY(0);   opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <h1>Knowledge Copilot</h1>
+    <p>Benefits Administration AI</p>
+  </div>
+
+  <button class="btn-new" onclick="newSession()">+ New Chat</button>
+
+  <div class="section-label">Chats</div>
+  <div class="sessions-list" id="sessions-list"></div>
+
+  <div class="sidebar-footer">
+    <label class="upload-zone">
+      <input type="file" id="file-input" accept=".pdf,.docx,.txt" onchange="uploadFile(this)" />
+      📎 Upload Document (PDF / DOCX / TXT)
+    </label>
+    <button class="btn-ingest" id="btn-ingest" onclick="ingest()">
+      ⚡ Index All Documents
+    </button>
+  </div>
+</aside>
+
+<!-- ── Main ── -->
+<div class="main">
+  <div class="topbar">
+    <span class="topbar-title" id="topbar-title">New Chat</span>
+    <span class="topbar-status" id="topbar-status"></span>
+  </div>
+
+  <div class="messages" id="messages">
+    <div class="welcome" id="welcome">
+      <div class="welcome-icon">🤖</div>
+      <h2>Benefits Administration Copilot</h2>
+      <p>
+        Ask questions about BRDs, benefit specs, reporting specs, and tickets.
+        Upload documents or click <strong>Index All Documents</strong> after
+        adding files to <code>data/documents/</code>.
+      </p>
+      <div class="chips">
+        <span class="chip" onclick="ask('What are the dental plan eligibility rules?')">Dental eligibility</span>
+        <span class="chip" onclick="ask('Summarise the UK BRD requirements')">UK BRD summary</span>
+        <span class="chip" onclick="ask('How do I file a medical claim?')">File a claim</span>
+        <span class="chip" onclick="ask('What changed for open enrolment this year?')">Open enrolment</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="input-bar">
+    <textarea id="input"
+      placeholder="Ask about benefits, eligibility, claims, specs…"
+      rows="1"
+      onkeydown="handleKey(event)"
+      oninput="autoResize(this)"></textarea>
+    <button class="btn-send" id="btn-send" onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let currentSession = 'session-' + Date.now();
+let sessions       = [currentSession];
+let streaming      = false;
+const apiKey       = () => localStorage.getItem('api_key') || '';
+
+// ── Boot ───────────────────────────────────────────────────────────────────
+window.onload = async () => {
+  renderSessions();
+  try {
+    const data = await apiFetch('/sessions').then(r => r.json());
+    (data.sessions || []).forEach(id => { if (!sessions.includes(id)) sessions.push(id); });
+    renderSessions();
+  } catch {}
+};
+
+// ── Sessions ───────────────────────────────────────────────────────────────
+function renderSessions() {
+  document.getElementById('sessions-list').innerHTML = sessions.map(id => `
+    <div class="session-row ${id === currentSession ? 'active' : ''}" onclick="switchSession('${escAttr(id)}')">
+      <span class="session-name">💬 ${escHtml(id)}</span>
+      <button class="btn-x" onclick="deleteSession(event,'${escAttr(id)}')">✕</button>
+    </div>`).join('');
+}
+
+function switchSession(id) {
+  currentSession = id;
+  document.getElementById('topbar-title').textContent = id;
+  clearMessages();
+  renderSessions();
+  toast('Switched to ' + id, 'info');
+}
+
+function newSession() {
+  currentSession = 'session-' + Date.now();
+  sessions.unshift(currentSession);
+  document.getElementById('topbar-title').textContent = currentSession;
+  clearMessages(true);
+  renderSessions();
+}
+
+async function deleteSession(e, id) {
+  e.stopPropagation();
+  try { await apiFetch('/sessions/' + id, { method: 'DELETE' }); } catch {}
+  sessions = sessions.filter(s => s !== id);
+  if (currentSession === id) newSession();
+  else renderSessions();
+}
+
+function clearMessages(showWelcome = false) {
+  const msgs = document.getElementById('messages');
+  msgs.innerHTML = '';
+  if (showWelcome) {
+    msgs.innerHTML = `<div class="welcome" id="welcome">
+      <div class="welcome-icon">🤖</div>
+      <h2>Benefits Administration Copilot</h2>
+      <p>Ask questions about BRDs, benefit specs, and tickets.
+         Upload documents or click <strong>Index All Documents</strong>.</p>
+      <div class="chips">
+        <span class="chip" onclick="ask('What are the dental plan eligibility rules?')">Dental eligibility</span>
+        <span class="chip" onclick="ask('Summarise the UK BRD requirements')">UK BRD summary</span>
+        <span class="chip" onclick="ask('How do I file a medical claim?')">File a claim</span>
+        <span class="chip" onclick="ask('What changed for open enrolment this year?')">Open enrolment</span>
+      </div></div>`;
+  }
+}
+
+// ── Chat ───────────────────────────────────────────────────────────────────
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+}
+
+function ask(q) {
+  document.getElementById('input').value = q;
+  sendMessage();
+}
+
+async function sendMessage() {
+  const inputEl  = document.getElementById('input');
+  const question = inputEl.value.trim();
+  if (!question || streaming) return;
+
+  inputEl.value = '';
+  inputEl.style.height = 'auto';
+  streaming = true;
+  document.getElementById('btn-send').disabled = true;
+
+  // Remove welcome screen
+  const welcome = document.getElementById('welcome');
+  if (welcome) welcome.remove();
+
+  const msgs = document.getElementById('messages');
+
+  // User bubble
+  appendBubble(msgs, 'user', 'You', escHtml(question));
+
+  // AI placeholder
+  const aiEl = appendBubble(msgs, 'ai', 'Copilot', '');
+  const bubble = aiEl.querySelector('.bubble');
+  bubble.innerHTML = '<div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+
+  setStatus('Thinking…');
+
+  const params = new URLSearchParams({ question, session_id: currentSession });
+  if (apiKey()) params.set('api_key', apiKey());
+
+  const es = new EventSource('/chat/stream?' + params);
+  let fullText = '';
+
+  es.onmessage = (e) => {
+    const data = JSON.parse(e.data);
+
+    if (data.error) {
+      bubble.innerHTML = `<em style="color:var(--danger)">${escHtml(data.error)}</em>`;
+      es.close(); finish();
+      return;
+    }
+
+    if (data.chunk) {
+      fullText += data.chunk;
+      bubble.innerHTML = renderMd(fullText);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    if (data.done) {
+      es.close();
+      if (data.sources?.length) {
+        const srcs = document.createElement('div');
+        srcs.className = 'sources';
+        srcs.innerHTML = data.sources.map(s =>
+          `<span class="src-chip">${srcIcon(s)}${escHtml(shortSrc(s))}</span>`
+        ).join('');
+        aiEl.appendChild(srcs);
+      }
+      if (!sessions.includes(currentSession)) {
+        sessions.unshift(currentSession);
+        renderSessions();
+      }
+      finish();
+    }
+  };
+
+  es.onerror = () => {
+    es.close();
+    if (!fullText) bubble.innerHTML = '<em style="color:var(--danger)">Connection error — is the server running?</em>';
+    finish();
+  };
+
+  function finish() {
+    streaming = false;
+    document.getElementById('btn-send').disabled = false;
+    setStatus('');
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+}
+
+function appendBubble(container, role, label, html) {
+  const div = document.createElement('div');
+  div.className = 'message ' + role;
+  div.innerHTML = `<div class="msg-label">${label}</div><div class="bubble">${html}</div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return div;
+}
+
+// ── Upload ─────────────────────────────────────────────────────────────────
+async function uploadFile(input) {
+  if (!input.files[0]) return;
+  const file = input.files[0];
+  setStatus('Uploading ' + file.name + '…');
+  const form = new FormData();
+  form.append('file', file);
+  try {
+    const res  = await apiFetch('/upload', { method: 'POST', body: form });
+    const data = await res.json();
+    if (res.ok) {
+      const note = data.indexed ? '' : ' (run Index All to activate)';
+      toast(`Uploaded: ${file.name} — ${data.chunks_created} chunks${note}`, 'success');
+    } else {
+      toast(data.detail || 'Upload failed', 'error');
+    }
+  } catch { toast('Upload failed', 'error'); }
+  setStatus('');
+  input.value = '';
+}
+
+// ── Ingest ─────────────────────────────────────────────────────────────────
+async function ingest() {
+  const btn = document.getElementById('btn-ingest');
+  btn.disabled = true;
+  btn.textContent = 'Indexing…';
+  setStatus('Indexing all documents…');
+  try {
+    const res  = await apiFetch('/ingest', {
+      method: 'POST',
+      body: '{}',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const data = await res.json();
+    if (res.ok) toast(`Indexed ${data.documents_loaded} docs · ${data.chunks_created} chunks`, 'success');
+    else toast(data.detail || 'Ingest failed', 'error');
+  } catch { toast('Ingest failed', 'error'); }
+  btn.disabled = false;
+  btn.textContent = '⚡ Index All Documents';
+  setStatus('');
+}
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
+function apiFetch(path, opts = {}) {
+  const headers = { ...(opts.headers || {}) };
+  if (apiKey()) headers['X-API-Key'] = apiKey();
+  return fetch(path, { ...opts, headers });
+}
+
+function setStatus(msg) {
+  document.getElementById('topbar-status').textContent = msg;
+}
+
+function srcIcon(s) {
+  if (s.startsWith('zendesk://')) return '🎫 ';
+  if (s.startsWith('jira://'))    return '🔧 ';
+  return '📄 ';
+}
+
+function shortSrc(s) {
+  if (s.startsWith('zendesk://') || s.startsWith('jira://'))
+    return s.split('/').pop();
+  return s.split(/[/\\]/).pop();
+}
+
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function escAttr(s) { return escHtml(s); }
+
+function renderMd(text) {
+  return escHtml(text)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,     '<em>$1</em>')
+    .replace(/`([^`]+)`/g,     '<code>$1</code>')
+    .replace(/^### (.+)$/gm,   '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm,    '<h3>$1</h3>')
+    .replace(/^# (.+)$/gm,     '<h3>$1</h3>')
+    .replace(/^\s*[-*] (.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>[\s\S]+?<\/li>)(\n(?!<li>)|$)/g, '<ul>$1</ul>')
+    .replace(/\n/g, '<br>');
+}
+
+function toast(msg, type = 'success') {
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3800);
+}
+</script>
+</body>
+</html>

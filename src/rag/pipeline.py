@@ -1,9 +1,11 @@
+import json
 import os
 import time
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables.history import RunnableWithMessageHistory
+from langchain_core.messages import HumanMessage, AIMessage
 from src.retrieval.vector_store import get_store
 from src.rag.memory import get_session_history
 
@@ -38,9 +40,17 @@ def _format_docs(docs: list) -> str:
     )
 
 
-def _llm() -> ChatOpenAI:
-    return ChatOpenAI(model=os.getenv("OPENAI_MODEL", "gpt-4o"), temperature=0)
+def _llm(streaming: bool = False) -> ChatOpenAI:
+    return ChatOpenAI(
+        model=os.getenv("OPENAI_MODEL", "gpt-4o"),
+        temperature=0,
+        streaming=streaming,
+    )
 
+
+# ---------------------------------------------------------------------------
+# Sync ask (used by /chat)
+# ---------------------------------------------------------------------------
 
 def ask(question: str, session_id: str = "default") -> dict:
     from src.analytics.logger import log_query
@@ -63,11 +73,48 @@ def ask(question: str, session_id: str = "default") -> dict:
     )
 
     sources = sorted({doc.metadata.get("source", "unknown") for doc in docs})
-    latency_ms = (time.monotonic() - t0) * 1000
-    log_query(session_id, question, answer, sources, latency_ms)
-
+    log_query(session_id, question, answer, sources, (time.monotonic() - t0) * 1000)
     return {"answer": answer, "sources": sources, "session_id": session_id}
 
+
+# ---------------------------------------------------------------------------
+# Async streaming ask (used by /chat/stream)
+# ---------------------------------------------------------------------------
+
+async def ask_stream(question: str, session_id: str = "default"):
+    """AsyncGenerator yielding SSE-ready JSON strings."""
+    from src.analytics.logger import log_query
+
+    t0 = time.monotonic()
+    retriever = get_store().as_retriever(search_kwargs={"k": 5})
+    docs = await retriever.ainvoke(question)
+    sources = sorted({doc.metadata.get("source", "unknown") for doc in docs})
+
+    history = get_session_history(session_id)
+    messages = _RAG_PROMPT.format_messages(
+        context=_format_docs(docs),
+        question=question,
+        history=history.messages,
+    )
+
+    llm = _llm(streaming=True)
+    full_answer = ""
+
+    async for chunk in llm.astream(messages):
+        if chunk.content:
+            full_answer += chunk.content
+            yield json.dumps({"chunk": chunk.content})
+
+    history.add_message(HumanMessage(content=question))
+    history.add_message(AIMessage(content=full_answer))
+
+    log_query(session_id, question, full_answer, sources, (time.monotonic() - t0) * 1000)
+    yield json.dumps({"done": True, "sources": sources, "session_id": session_id})
+
+
+# ---------------------------------------------------------------------------
+# Summarize
+# ---------------------------------------------------------------------------
 
 def summarize(source: str) -> dict:
     store = get_store()
@@ -77,9 +124,4 @@ def summarize(source: str) -> dict:
 
     chain = _SUMMARIZE_PROMPT | _llm() | StrOutputParser()
     summary = chain.invoke({"context": _format_docs(context_docs)})
-
-    return {
-        "summary": summary,
-        "source": source,
-        "chunks_used": len(context_docs),
-    }
+    return {"summary": summary, "source": source, "chunks_used": len(context_docs)}
